@@ -1,0 +1,78 @@
+== Components
+[plantuml]
+....
+@startuml(id=components)
+scale max 2000x2000
+title Spring PetClinic - Web Application - Components
+caption The Components diagram for the Spring PetClinic web application.
+
+skinparam {
+  shadowing false
+  arrowColor #707070
+  actorBorderColor #707070
+  componentBorderColor #707070
+  rectangleBorderColor #707070
+  noteBackgroundColor #ffffff
+  noteBorderColor #707070
+  rectangleFontColor #ffffff
+  rectangleStereotypeFontColor #ffffff
+}
+actor "Clinic Employee" <<Person>> as 2 #519823
+note right of 2
+  An employee of the clinic
+end note
+database 5 <<Container>> #91d366 [
+  Relational Database
+  --
+  Stores information regarding
+  the veterinarians, the
+  clients, and their pets.
+]
+package "Web Application" <<Container>> {
+  component 11 <<Spring Repository>> #95d46c [
+    PetRepository
+    --
+    Repository class for Pet
+    domain objects All method
+    names are compliant with
+    Spring Data naming
+    conventions so this interface
+    can easily be extende...
+  ]
+  component "VetController" <<Spring MVC Controller>> as 10 #d4f3c0
+  component 12 <<Spring Repository>> #95d46c [
+    VetRepository
+    --
+    Repository class for Vet
+    domain objects All method
+    names are compliant with
+    Spring Data naming
+    conventions so this interface
+    can easily be extende...
+  ]
+  component "VisitController" <<Spring MVC Controller>> as 9 #d4f3c0
+  component 13 <<Spring Repository>> #95d46c [
+    VisitRepository
+    --
+    Repository class for Visit
+    domain objects All method
+    names are compliant with
+    Spring Data naming
+    conventions so this interface
+    can easily be exten...
+  ]
+  component "WelcomeController" <<Spring MVC Controller>> as 8 #d4f3c0
+}
+2 .[#707070].> 10 : <<HTTP>>\nUses
+2 .[#707070].> 9 : <<HTTP>>\nUses
+2 .[#707070].> 8 : <<HTTP>>\nUses
+11 .[#707070].> 5 : <<JDBC>>\nReads from and writes to
+10 .[#707070].> 12 
+12 .[#707070].> 5 : <<JDBC>>\nReads from and writes to
+9 .[#707070].> 11 
+9 .[#707070].> 13 
+13 .[#707070].> 5 : <<JDBC>>\nReads from and writes to
+@enduml
+@enduml
+....
+
