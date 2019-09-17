@@ -9,24 +9,19 @@ import io.cucumber.java.en.When;
  */
 public class ArchidoctorDriver {
 
-  private final Archidoctor archidoctor = new Archidoctor();
-  private final FakeApplication app;
+  private final Archidoctor archidoctor;
+  private final SoftwarePiece app;
   private final OutputDirectory outputDirectory;
 
-  public ArchidoctorDriver(final FakeApplication app, final OutputDirectory outputDirectory) {
+  public ArchidoctorDriver(final SoftwarePiece app, final OutputDirectory outputDirectory) {
     this.app = app;
     this.outputDirectory = outputDirectory;
+    this.archidoctor = new Archidoctor();
   }
 
-  /**
-   * @param app
-   * @param outputDirectory
-   * @return
-   */
-  @When("the application is documented")
-  public Void document() {
-    this.archidoctor.document(this.app.getNamespace(), this.outputDirectory.getPath());
-    return null;
+  @When("documentation is generated")
+  public void generateDocumentation() {
+    this.archidoctor.document(this.app.getNamespace(), this.outputDirectory.getPath(), this.app.getName());
   }
 
 }

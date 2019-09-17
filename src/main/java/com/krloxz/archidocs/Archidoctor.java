@@ -167,8 +167,9 @@ public class Archidoctor {
   /**
    * @param nameSpace
    * @param path
+   * @param containerName
    */
-  public void document(final String namespace, final Path path) {
+  public void document(final String namespace, final Path path, final String containerName) {
     String diagram = null;
     try {
       diagram = documentComponents("/Users/Carlos/Projects/Archidocs/repos/archidocs/src/test/java", namespace);
@@ -176,19 +177,33 @@ public class Archidoctor {
       throw new IllegalStateException("Not able to generate the components diagram", e);
     }
     final StringBuilder snippet = new StringBuilder();
-    snippet.append("== Components\n");
+    snippet.append("== " + buildTitle(containerName) + "\n");
     snippet.append("[plantuml]\n");
     snippet.append("....\n");
     snippet.append(diagram);
     snippet.append("@enduml\n");
     snippet.append("....\n");
-    final Path newFile = path.resolve("components.adoc");
+    final Path newFile = path.resolve(newFileName(containerName));
     try {
       // System.out.println(snippet.toString());
       Files.write(newFile, snippet.toString().getBytes());
     } catch (IOException e) {
       throw new IllegalStateException("Components file couldn't be created", e);
     }
+  }
+
+  private String buildTitle(final String containerName) {
+    if (containerName == null) {
+      return "Container";
+    }
+    return containerName + " Container";
+  }
+
+  private String newFileName(final String containerName) {
+    if (containerName == null) {
+      return "default-container.adoc";
+    }
+    return containerName.toLowerCase().replace(' ', '-') + "-container.adoc";
   }
 
 }

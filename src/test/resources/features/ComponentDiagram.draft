@@ -1,0 +1,11 @@
+Feature: Generate Component Diagrams
+  As a developer,
+  I want to automate generation of component diagrams
+  so that these diagrams 
+
+  Scenario: Find Spring Components
+    Given a piece of software implementing a container
+      And the piece of software has 3 Spring-annotated classes
+    When the component diagram is generated
+    Then the generated diagram has 3 components
+

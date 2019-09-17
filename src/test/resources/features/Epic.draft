@@ -1,0 +1,25 @@
+Epic: Document Software Architecture
+As a developer,
+I want to automate documentation of software architecture
+so that documentation keeps current, accurate, reliable and useful to communicate software architecture
+
+User Story: Document System Context (Manually)
+As a developer,
+I want to provide the location of a custom diagram
+so that this diagram is used to document the System Context
+
+User Story: Document System (Manually)
+As a developer,
+I want to provide the location of a custom diagram
+so that this diagram is used to document the system architecture
+
+User Story: Generate Classes Diagrams
+As a developer,
+I want to automate the generation of classes diagrams
+so that these diagrams can be used to document components
+
+User Story: Collect Documents
+As a developer,
+I want to automate collection of generated documents
+so that I can see all them in a single Asciidoc snippet...
+ 
