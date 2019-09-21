@@ -1,0 +1,40 @@
+Feature: Generate Component Views
+  As a developer,
+  I want to automate generation of Component Views
+  so that Component documentation can be quickly updated
+
+  Scenario: Find Spring Components
+    Given a piece of software implementing a container
+      And a piece of software has a Spring-annotated class named "Component1"
+    When the Component view is generated
+    Then the view has an internal component named "Component1"
+
+  Scenario: Default Actor
+    Given a piece of software implementing a container
+    When the Component view is generated
+    Then the view has an external actor named "Client"
+
+  Scenario: Named Default Actor
+    Given a piece of software implementing a container
+      And given a default actor named "Actor1"
+    When the Component view is generated
+    Then the view has an external actor named "Actor1"
+
+  Scenario: Default Actor Relationships
+    Given a piece of software implementing a container
+      And a piece of software has a Spring-annotated class named "Component1"
+    When the Components view is generated
+    Then the view has a synchronous relationship from "Client" to "Component1"
+
+  Scenario: Find Package Components
+    Given a piece of software implementing a container
+      And the piece of software has 2 main namespaces
+    When the Components view is generated
+    Then the view has 2 internal components
+
+  Scenario: Find Package Relationships
+    Given a piece of software implementing a container
+      And the piece of software has 2 main namespaces
+      And namespace1 has a class calling a class in namespace2
+    When the Components view is generated
+    Then the view has a synchronous relationship from namespace1 to namespace2

@@ -12,18 +12,27 @@ import java.util.Optional;
 
 import org.picocontainer.Disposable;
 
-import io.cucumber.java.en.Given;
-import io.cucumber.java.en.Then;
+import com.krloxz.archidocs.MutableArchidoctorConfig;
 
 /**
  * @author Carlos Gomez
  */
 public class OutputDirectory implements Disposable {
 
-  private Path path;
+  private final Path path;
 
-  public Path getPath() {
-    return this.path;
+  public OutputDirectory() {
+    this.path = createDirectory();
+  }
+
+  public void hasFile(final String fileName) throws IOException {
+    assertThat(this.path).isDirectoryContaining("glob:**/" + fileName);
+  }
+
+  public List<String> readLines(final String fileName) throws IOException {
+    final Optional<Path> snippet = Files.list(this.path).findFirst();
+    assertThat(snippet).isNotEmpty();
+    return Files.readAllLines(snippet.get());
   }
 
   @Override
@@ -33,51 +42,15 @@ public class OutputDirectory implements Disposable {
     }
   }
 
-  @Given("an output directory")
-  public void outputDirectory() throws IOException {
-    this.path = Files.createTempDirectory("archidoctor");
+  public MutableArchidoctorConfig enrichConfig(final MutableArchidoctorConfig config) {
+    return config.setOutputDirectory(this.path);
   }
 
-  @Then("the output directory has a snippet named {string}")
-  public void hasSnippet(final String name) {
-    assertThat(this.path).isDirectoryContaining("glob:**/" + name);
-  }
-
-  @Then("the output directory has a snippet titled {string}")
-  public void snippetTitled(final String title) throws IOException {
-    final Optional<Path> snippet = Files.list(this.path).findFirst();
-    assertThat(snippet).isNotEmpty();
-    final List<String> lines = Files.readAllLines(snippet.get());
-    assertThat(lines.get(0)).isEqualTo("== " + title);
-  }
-
-  @Then("the output directory has a snippet containing a {string} diagram")
-  public void snippedContainingDiagram(final String diagramType) throws IOException {
-    final Optional<Path> snippet = Files.list(this.path).findFirst();
-    assertThat(snippet).isNotEmpty();
-    final List<String> lines = Files.readAllLines(snippet.get());
-    assertThat(lines.get(1)).isEqualTo("[plantuml]");
-    assertThat(lines.get(2)).isEqualTo("....");
-    assertThat(lines.get(3)).isEqualTo("@startuml(id=components)");
-    assertThat(lines.get(lines.size() - 2)).isEqualTo("@enduml");
-    assertThat(lines.get(lines.size() - 1)).isEqualTo("....");
-  }
-
-  @Then("the output directory has a container snippet")
-  public void containsComponentsSnippet() {
-    assertThat(this.path).isDirectoryContaining("glob:**/components.adoc");
-
+  private Path createDirectory() {
     try {
-      final List<String> lines = Files.readAllLines(this.path.resolve("components.adoc"));
-      assertThat(lines).hasSizeGreaterThan(6);
-      assertThat(lines.get(0)).isEqualTo("== Components");
-      assertThat(lines.get(1)).isEqualTo("[plantuml]");
-      assertThat(lines.get(2)).isEqualTo("....");
-      assertThat(lines.get(3)).isEqualTo("@startuml(id=components)");
-      assertThat(lines.get(lines.size() - 2)).isEqualTo("@enduml");
-      assertThat(lines.get(lines.size() - 1)).isEqualTo("....");
+      return Files.createTempDirectory("archidoctor");
     } catch (IOException e) {
-      throw new IllegalStateException("Not able to read the file: " + this.path, e);
+      throw new IllegalStateException("Not able to create output directory", e);
     }
   }
 

@@ -1,8 +1,9 @@
 
 plugins {
     id 'java-library'
-    //id 'com.adarshr.test-logger' version '1.7.0'
+    id 'com.adarshr.test-logger' version '1.7.0'
     id 'org.asciidoctor.convert' version '1.5.9.2'
+    id 'net.ltgt.apt-eclipse' version '0.21'
 }
 
 repositories {
@@ -11,52 +12,60 @@ repositories {
 
 def cucumberVersion = '4.7.1'
 def junitVersion = '5.5.2'
-dependencies {
-  implementation 'com.structurizr:structurizr-spring:1.3.0'
-  implementation 'com.structurizr:structurizr-plantuml:1.3.0'
-  implementation 'com.google.guava:guava:27.0-jre'
-  implementation files("${System.getProperty('java.home')}/../lib/tools.jar")
+def structurizrVersion = '1.3.0'
+def immutablesVersion = '2.7.5'
 
+dependencies {
+  // Structurizr
+  api "com.structurizr:structurizr-core:${structurizrVersion}"
+  implementation "com.structurizr:structurizr-spring:${structurizrVersion}"
+  implementation "com.structurizr:structurizr-plantuml:${structurizrVersion}"
+  implementation 'com.google.guava:guava:27.0-jre'
+  
+  // Immutables
+  annotationProcessor "org.immutables:value:${immutablesVersion}"
+  compileOnly "org.immutables:value-annotations:${immutablesVersion}"
+
+  // Unit testing
   testImplementation "org.junit.jupiter:junit-jupiter-api:${junitVersion}"
   testRuntimeOnly "org.junit.jupiter:junit-jupiter-engine:${junitVersion}"
   testRuntimeOnly "org.junit.vintage:junit-vintage-engine:${junitVersion}"
   testImplementation 'org.assertj:assertj-core:3.13.2'
   testImplementation 'org.mockito:mockito-core:3.0.0'
+  
+  // Cucumber
   testImplementation "io.cucumber:cucumber-java:${cucumberVersion}"
   testImplementation "io.cucumber:cucumber-junit:${cucumberVersion}"
   testImplementation "io.cucumber:cucumber-picocontainer:${cucumberVersion}"
   testImplementation 'org.slf4j:slf4j-log4j12:1.7.28'
-  //testImplementation files('/Users/Carlos/Projects/Archidocs/repos/spring-petclinic/target/classes')
-  //testImplementation fileTree(dir: '/Users/Carlos/Projects/Archidocs/repos/spring-petclinic/target/spring-petclinic-2.1.0.BUILD-SNAPSHOT/WEB-INF/lib', include: '*.jar')
-  
+  testRuntimeOnly files("${System.getProperty('java.home')}/../lib/tools.jar")
+
+  // Asciidoctor Plugin
   asciidoctor 'org.asciidoctor:asciidoctorj-diagram:1.5.18'
 }
 
+// Configure Asciidoctor
 asciidoctor {
   requires 'asciidoctor-diagram'
 }
 
+// Configure JUnit
 test {
   useJUnitPlatform()
-  testLogging {
-    events "passed", "skipped", "failed", "standardOut", "standardError"
-  }
 }
-
-/*
 testlogger {
     showStandardStreams true
 }
-*/
 
+// Configure Cucumber
 configurations {
     cucumberRuntime {
-        extendsFrom testImplementation
+        extendsFrom testImplementation, testRuntimeOnly
     }
 }
 task cucumber() {
   description 'Runs the Cucumber tests'
-  dependsOn cleanTest, compileTestJava
+  dependsOn test
   group 'verification'
   doLast {
     javaexec {
