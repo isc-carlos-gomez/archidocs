@@ -1,9 +1,12 @@
 package com.krloxz.archidocs;
 
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.StringUtils;
+
 import com.structurizr.Workspace;
-import com.structurizr.analysis.ComponentFinder;
 import com.structurizr.analysis.ReferencedTypesSupportingTypesStrategy;
-import com.structurizr.analysis.SourceCodeComponentFinderStrategy;
 import com.structurizr.analysis.SpringComponentFinderStrategy;
 import com.structurizr.documentation.Format;
 import com.structurizr.documentation.StructurizrDocumentationTemplate;
@@ -28,54 +31,54 @@ public class DocumentationGenerator {
    * @throws Exception
    */
   // TODO: return a Snippet
-  public Workspace documentComponents(final ArchidoctorConfig config) throws Exception {
-    Workspace workspace = new Workspace("Spring Boot PetClinic",
-      "This is a C4 representation of the Spring Boot PetClinic sample app (https://github.com/spring-projects/spring-petclinic/)");
+  public Documentation documentComponents(final ArchidoctorConfig config) throws Exception {
+    final Workspace workspace = new Workspace("Spring Boot PetClinic",
+        "This is a C4 representation of the Spring Boot PetClinic sample app (https://github.com/spring-projects/spring-petclinic/)");
     // workspace.setVersion(VERSION);
-    Model model = workspace.getModel();
+    final Model model = workspace.getModel();
 
     // create the basic model (the stuff we can't get from the code)
-    SoftwareSystem springPetClinic = model.addSoftwareSystem("Spring PetClinic",
-      "Allows employees to view and manage information regarding the veterinarians, the clients, and their pets.");
-    Person clinicEmployee = model.addPerson("Clinic Employee", "An employee of the clinic");
-    clinicEmployee.uses(springPetClinic, "Uses");
+    final SoftwareSystem system = model.addSoftwareSystem("Spring PetClinic",
+        "Allows employees to view and manage information regarding the veterinarians, the clients, and their pets.");
+    final Person clinicEmployee = model.addPerson("Clinic Employee", "An employee of the clinic");
+    clinicEmployee.uses(system, "Uses");
 
-    Container webApplication = springPetClinic.addContainer(
-      "Web Application",
-      "Allows employees to view and manage information regarding the veterinarians, the clients, and their pets.",
-      "Apache Tomcat 7.x");
-    Container relationalDatabase = springPetClinic.addContainer(
-      "Relational Database", "Stores information regarding the veterinarians, the clients, and their pets.",
-      "HSQLDB");
-    clinicEmployee.uses(webApplication, "Uses", "HTTP");
-    webApplication.uses(relationalDatabase, "Reads from and writes to", "JDBC, port 9001");
+    final Container defaultContainer = system.addContainer(
+        "Web Application",
+        "Allows employees to view and manage information regarding the veterinarians, the clients, and their pets.",
+        "Apache Tomcat 7.x");
+    final Container relationalDatabase = system.addContainer(
+        "Relational Database", "Stores information regarding the veterinarians, the clients, and their pets.",
+        "HSQLDB");
+    clinicEmployee.uses(defaultContainer, "Uses", "HTTP");
+    defaultContainer.uses(relationalDatabase, "Reads from and writes to", "JDBC, port 9001");
 
-    SpringComponentFinderStrategy springComponentFinderStrategy = new SpringComponentFinderStrategy(
-      new ReferencedTypesSupportingTypesStrategy(false));
+    final SpringComponentFinderStrategy springComponentFinderStrategy = new SpringComponentFinderStrategy(
+        new ReferencedTypesSupportingTypesStrategy(false));
     springComponentFinderStrategy.setIncludePublicTypesOnly(false);
 
     // and now automatically find all Spring @Controller, @Component, @Service and @Repository components
-    ComponentFinder componentFinder = new ComponentFinder(
-      webApplication,
-      config.namespace().get(),
-      springComponentFinderStrategy,
-      new SourceCodeComponentFinderStrategy(config.sourcePath().get().toFile(), 150));
-
-    componentFinder.exclude(".*Formatter.*");
-    componentFinder.findComponents();
+    // final ComponentFinder componentFinder = new ComponentFinder(
+    // defaultContainer,
+    // config.namespace().get(),
+    // springComponentFinderStrategy,
+    // new SourceCodeComponentFinderStrategy(config.sourcePath().get().toFile(), 150));
+    //
+    // componentFinder.exclude(".*Formatter.*");
+    // componentFinder.findComponents();
 
     // connect the user to all of the Spring MVC controllers
-    webApplication.getComponents().stream()
-      .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_MVC_CONTROLLER))
-      .forEach(c -> clinicEmployee.uses(c, "Uses", "HTTP"));
+    defaultContainer.getComponents().stream()
+        .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_MVC_CONTROLLER))
+        .forEach(c -> clinicEmployee.uses(c, "Uses", "HTTP"));
 
     // connect all of the repository components to the relational database
-    webApplication.getComponents().stream()
-      .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REPOSITORY))
-      .forEach(c -> c.uses(relationalDatabase, "Reads from and writes to", "JDBC"));
+    defaultContainer.getComponents().stream()
+        .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REPOSITORY))
+        .forEach(c -> c.uses(relationalDatabase, "Reads from and writes to", "JDBC"));
 
     // finally create some views
-    ViewSet views = workspace.getViews();
+    final ViewSet views = workspace.getViews();
     // SystemContextView contextView = views.createSystemContextView(springPetClinic, "context",
     // "The System Context diagram for the Spring PetClinic system.");
     // contextView.addAllSoftwareSystems();
@@ -87,8 +90,8 @@ public class DocumentationGenerator {
     // containerView.addAllSoftwareSystems();
     // containerView.addAllContainers();
 
-    ComponentView componentView = views.createComponentView(webApplication, "Components",
-      "The Components diagram for the Spring PetClinic web application.");
+    final ComponentView componentView = views.createComponentView(defaultContainer, "Components1",
+        "The Components diagram for the Spring PetClinic web application.");
     componentView.addAllComponents();
     componentView.addAllPeople();
     componentView.add(relationalDatabase);
@@ -107,16 +110,16 @@ public class DocumentationGenerator {
      */
 
     // tag and style some elements
-    springPetClinic.addTags("Spring PetClinic");
-    webApplication.getComponents().stream()
-      .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_MVC_CONTROLLER))
-      .forEach(c -> c.addTags("Spring MVC Controller"));
-    webApplication.getComponents().stream()
-      .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_SERVICE))
-      .forEach(c -> c.addTags("Spring Service"));
-    webApplication.getComponents().stream()
-      .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REPOSITORY))
-      .forEach(c -> c.addTags("Spring Repository"));
+    system.addTags("Spring PetClinic");
+    defaultContainer.getComponents().stream()
+        .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_MVC_CONTROLLER))
+        .forEach(c -> c.addTags("Spring MVC Controller"));
+    defaultContainer.getComponents().stream()
+        .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_SERVICE))
+        .forEach(c -> c.addTags("Spring Service"));
+    defaultContainer.getComponents().stream()
+        .filter(c -> c.getTechnology().equals(SpringComponentFinderStrategy.SPRING_REPOSITORY))
+        .forEach(c -> c.addTags("Spring Repository"));
     relationalDatabase.addTags("Database");
 
     // Component vetController = webApplication.getComponentWithName("VetController");
@@ -128,7 +131,7 @@ public class DocumentationGenerator {
     // dynamicView.add(vetController, "Calls findAll", vetRepository);
     // dynamicView.add(vetRepository, "select * from vets", relationalDatabase);
 
-    Styles styles = views.getConfiguration().getStyles();
+    final Styles styles = views.getConfiguration().getStyles();
     styles.addElementStyle("Spring PetClinic").background("#6CB33E").color("#ffffff");
     styles.addElementStyle(Tags.PERSON).background("#519823").color("#ffffff").shape(Shape.Person);
     styles.addElementStyle(Tags.CONTAINER).background("#91D366").color("#ffffff");
@@ -140,11 +143,44 @@ public class DocumentationGenerator {
     // StructurizrClient structurizrClient = new StructurizrClient(API_KEY, API_SECRET);
     // structurizrClient.putWorkspace(WORKSPACE_ID, workspace);
 
-    final StructurizrDocumentationTemplate template = new StructurizrDocumentationTemplate(workspace);
-    template.addComponentsSection(webApplication, Format.Markdown,
-      "![](embed:Components)\n");
+    generateViews(config, workspace, defaultContainer);
+    generateSections(config, workspace, defaultContainer);
+    return new Documentation(workspace);
+  }
 
-    return workspace;
+  private void generateViews(final ArchidoctorConfig config, final Workspace workspace,
+      final Container defaultContainer) {
+    final ViewSet views = workspace.getViews();
+    config.containers().forEach(container -> {
+      final String key = StringUtils.deleteWhitespace(container.name().orElse("Components"));
+      final String description = container.name()
+          .map(name -> String.format("The Components diagram for the %s Container.", name))
+          .orElse("The Components diagram.");
+      final ComponentView view = views.createComponentView(defaultContainer, key, description);
+      view.addAllComponents();
+      view.addAllPeople();
+    });
+  }
+
+  private void generateSections(final ArchidoctorConfig config, final Workspace workspace,
+      final Container defaultContainer) {
+    final String sectionContent = config.containers()
+        .stream()
+        .map(container -> generateSubsection(container.name()))
+        .collect(Collectors.joining());
+
+    final StructurizrDocumentationTemplate template = new StructurizrDocumentationTemplate(workspace);
+    template.addComponentsSection(defaultContainer, Format.Markdown, sectionContent);
+  }
+
+  private static String generateSubsection(final Optional<String> subsectionName) {
+    final String subTitle = subsectionName
+        .map(name -> String.format("=== %s", name))
+        .orElse(StringUtils.EMPTY);
+
+    final String viewKey = StringUtils.deleteWhitespace(subsectionName.orElse("Components"));
+    final String embeddedView = String.format("![](embed:%s)\n", viewKey);
+    return subTitle + embeddedView;
   }
 
 }

@@ -1,7 +1,7 @@
 package com.krloxz.archidocs;
 
 import java.nio.file.Path;
-import java.util.Optional;
+import java.util.Set;
 
 import org.immutables.value.Value;
 
@@ -15,10 +15,6 @@ public interface ArchidoctorConfig {
 
   Path outputDirectory();
 
-  Optional<Path> sourcePath();
-
-  Optional<String> namespace();
-
-  Optional<String> containerName();
+  Set<ContainerDescriptor> containers();
 
 }

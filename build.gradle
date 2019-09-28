@@ -20,7 +20,10 @@ dependencies {
   api "com.structurizr:structurizr-core:${structurizrVersion}"
   implementation "com.structurizr:structurizr-spring:${structurizrVersion}"
   implementation "com.structurizr:structurizr-plantuml:${structurizrVersion}"
+
+  // Utilities
   implementation 'com.google.guava:guava:27.0-jre'
+  implementation 'org.apache.commons:commons-lang3:3.9'
   
   // Immutables
   annotationProcessor "org.immutables:value:${immutablesVersion}"
@@ -65,7 +68,7 @@ configurations {
 }
 task cucumber() {
   description 'Runs the Cucumber tests'
-  dependsOn test
+  dependsOn processTestResources, compileTestJava
   group 'verification'
   doLast {
     javaexec {
